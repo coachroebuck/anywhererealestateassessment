@@ -35,7 +35,7 @@ class TransformFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val transformViewModel = ViewModelProvider(this).get(TransformViewModel::class.java)
+        val transformViewModel = ViewModelProvider(this)[TransformViewModel::class.java]
         _binding = FragmentTransformBinding.inflate(inflater, container, false)
         val root: View = binding.root
 

@@ -20,6 +20,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
@@ -37,6 +38,20 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig true
+    }
+    flavorDimensions += "version"
+    productFlavors {
+        create("simpsons") {
+            dimension = "version"
+            isDefault true
+            buildConfigField "String", "KEYWORDS", "\"simpsons+characters\""
+        }
+        create("wire") {
+            dimension = "version"
+            isDefault true
+            buildConfigField "String", "KEYWORDS", "\"the+wire+characters\""
+        }
     }
     lint {
         abortOnError false

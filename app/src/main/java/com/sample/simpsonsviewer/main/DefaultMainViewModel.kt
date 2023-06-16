@@ -1,4 +1,4 @@
 package com.sample.simpsonsviewer.main
 
-class DefaultMainViewModel : MainViewModel {
+class DefaultMainViewModel(private val repository: MainRepository) : MainViewModel {
 }
