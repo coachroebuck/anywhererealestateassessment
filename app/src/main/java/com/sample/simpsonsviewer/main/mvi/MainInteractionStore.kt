@@ -1,6 +1,6 @@
 package com.sample.simpsonsviewer.main.mvi
 
-import com.sample.simpsonsviewer.model.ServiceResponse
+import com.sample.simpsonsviewer.model.ServiceResponseSummary
 
 sealed interface MainInteractionStore {
     sealed interface Intent {
@@ -9,7 +9,7 @@ sealed interface MainInteractionStore {
     sealed interface State {
         object Idle : State
         object InProgress : State
-        data class Success(val data: ServiceResponse?): State
+        data class Success(val data: List<ServiceResponseSummary>): State
         data class Error(val throwable: Throwable): State
     }
 }

@@ -20,6 +20,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object MainModule {
 
+    private const val domain = "https://duckduckgo.com"
     @Provides
     @Singleton
     fun provideMainRepository(
@@ -36,17 +37,18 @@ object MainModule {
 
     @Provides
     @Singleton
-    fun provideMainInteractor(
+    fun provideMainInteraction(
         repository: MainRepository,
+        coroutineScope: CoroutineScope,
     ): MainInteraction =
-        DefaultMainInteraction(repository)
+        DefaultMainInteraction(repository, coroutineScope, domain)
 
     @Provides
     @Singleton
     fun provideMainViewModel(
-        interactor: MainInteraction,
+        interaction: MainInteraction,
         coroutineScope: CoroutineScope
     ): MainViewModel =
-        DefaultMainViewModel(interactor, coroutineScope)
+        DefaultMainViewModel(interaction, coroutineScope)
 
 }

@@ -9,7 +9,7 @@ sealed interface MainRepositoryStore {
     sealed interface State {
         object Idle : State
         object InProgress : State
-        data class Success(val response: ServiceResponse? = null): State
+        data class Success(val data: ServiceResponse? = null): State
         data class Error(val throwable: Throwable): State
     }
 }

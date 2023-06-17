@@ -11,7 +11,6 @@ import org.junit.Test
 
 internal class PermissionsUtilityTest : DefaultUnitTest() {
 
-    private lateinit var logAdapter: LogAdapter
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var contextCompatWrapper: ContextCompatWrapper
     private lateinit var activityCompatWrapper: ActivityCompatWrapper
@@ -22,7 +21,6 @@ internal class PermissionsUtilityTest : DefaultUnitTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        logAdapter = mockk(relaxed = true)
         requestPermissionLauncher = mockk(relaxed = true)
         contextCompatWrapper = mockk(relaxed = true)
         activityCompatWrapper = mockk(relaxed = true)
