@@ -263,6 +263,8 @@ class MainViewModelTest : DefaultUnitTest() {
         validateEquality(text, model.query)
     }
 
+    // endregion
+
     // region Responses from Interaction
 
     @Test
@@ -306,6 +308,8 @@ class MainViewModelTest : DefaultUnitTest() {
 
     // endregion
 
+    // region Private Methods
+
     private fun onCreate() {
         viewModel.onCreate(bundle)
         runBlocking { coroutineScope.testScheduler.advanceUntilIdle() }
@@ -325,4 +329,6 @@ class MainViewModelTest : DefaultUnitTest() {
         stateFlow.value = state
         runBlocking { coroutineScope.testScheduler.advanceUntilIdle() }
     }
+
+    // endregion
 }
