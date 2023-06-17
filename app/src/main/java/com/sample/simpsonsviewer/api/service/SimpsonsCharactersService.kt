@@ -8,5 +8,5 @@ import retrofit2.http.Query
 
 interface SimpsonsCharactersService {
     @GET("/?format=json")
-    fun start(@Query("q") query: String = BuildConfig.KEYWORDS): Call<ResponseBody>
+    fun start(@Query("q") query: String?): Call<ResponseBody>
 }

@@ -4,5 +4,5 @@ import okhttp3.ResponseBody
 import retrofit2.Call
 
 interface SimpsonsCharactersAdapter {
-    fun start(): Call<ResponseBody>?
+    fun start(text: String? = null): Call<ResponseBody>?
 }

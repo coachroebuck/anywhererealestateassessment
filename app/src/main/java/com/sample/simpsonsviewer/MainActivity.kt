@@ -12,9 +12,13 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SearchView
+import androidx.lifecycle.lifecycleScope
 import com.sample.simpsonsviewer.databinding.ActivityMainBinding
+import com.sample.simpsonsviewer.main.mvi.MainViewModelStore
 import com.sample.simpsonsviewer.main.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -31,6 +35,20 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.appBarMain.toolbar)
 
+        viewModel.onCreate(savedInstanceState)
+        (binding.appBarMain.searchView as SearchView).apply {
+            setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+                override fun onQueryTextSubmit(query: String?): Boolean {
+                    submitQueryText(query)
+                    return false
+                }
+
+                override fun onQueryTextChange(newText: String?): Boolean {
+                    queryTextChange(newText)
+                    return true
+                }
+            })
+        }
         binding.appBarMain.fab?.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
@@ -60,6 +78,31 @@ class MainActivity : AppCompatActivity() {
             setupActionBarWithNavController(navController, appBarConfiguration)
             it.setupWithNavController(navController)
         }
+
+        lifecycleScope.launch {
+            viewModel.stateFlow.collect { value ->
+                onStateReceived(state = value)
+            }
+        }
+    }
+
+    private fun queryTextChange(text: String?) {
+        viewModel.emit(MainViewModelStore.Intent.OnSearchQueryChanged(text))
+    }
+
+    private fun onStateReceived(state: MainViewModelStore.State) {
+        when(state) {
+            MainViewModelStore.State.Idle -> { }
+            is MainViewModelStore.State.OriginalSearchQuery -> onOriginalSearchQuery(state)
+        }
+    }
+
+    private fun onOriginalSearchQuery(state: MainViewModelStore.State.OriginalSearchQuery) {
+        (binding.appBarMain.searchView as SearchView).setQuery(state.query, false)
+    }
+
+    private fun submitQueryText(query: String?) {
+        viewModel.emit(MainViewModelStore.Intent.SubmitQueryText(query))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -88,5 +131,15 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        viewModel.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        viewModel.onRestoreInstanceState(savedInstanceState)
     }
 }
