@@ -156,6 +156,8 @@ open class DefaultUnitTest {
 
     companion object {
         @JvmStatic
+        protected val text = "keywords"
+        @JvmStatic
         protected val mockResponse = """
             {
 "Abstract": "",

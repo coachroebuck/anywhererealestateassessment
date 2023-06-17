@@ -1,10 +1,8 @@
 package com.sample.simpsonsviewer.main
 
 import com.sample.simpsonsviewer.api.service.SimpsonsCharactersAdapter
-import com.sample.simpsonsviewer.log.LogAdapter
 import com.sample.simpsonsviewer.main.mvi.MainRepositoryStore
 import com.sample.simpsonsviewer.permissions.DefaultUnitTest
-import com.sample.simpsonsviewer.serialization.AppSerializer
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -137,9 +135,5 @@ class MainRepositoryTest : DefaultUnitTest() {
     private fun emit(intent: MainRepositoryStore.Intent) {
         repository.emit(intent)
         runBlocking { coroutineScope.testScheduler.advanceUntilIdle() }
-    }
-
-    companion object {
-        private const val text = "keywords"
     }
 }

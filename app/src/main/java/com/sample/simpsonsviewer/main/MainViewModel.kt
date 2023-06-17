@@ -10,6 +10,5 @@ interface MainViewModel {
     fun onRestoreInstanceState(savedInstanceState: Bundle)
     fun emit(intent: MainViewModelStore.Intent)
 
-    val query: String
     val stateFlow: StateFlow<MainViewModelStore.State>
 }

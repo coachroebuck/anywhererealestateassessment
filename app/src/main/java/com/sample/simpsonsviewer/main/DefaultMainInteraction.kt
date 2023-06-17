@@ -97,7 +97,7 @@ URL of /i/cb4121fd.png" => https://duckduckgo.com/i/cb4121fd.png
     }
 
     private fun sendResponse(state: MainInteractionStore.State) {
-        coroutineScope.launch { _stateFlow.emit(state) }
+        coroutineScope.launch { _stateFlow.tryEmit(state) }
     }
 
 }

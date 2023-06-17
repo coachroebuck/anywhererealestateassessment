@@ -3,6 +3,7 @@ package com.sample.simpsonsviewer
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(binding.appBarMain.toolbar)
 
         viewModel.onCreate(savedInstanceState)
-        (binding.appBarMain.searchView as SearchView).apply {
+        binding.appBarMain.searchView.apply {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     submitQueryText(query)
@@ -91,14 +92,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onStateReceived(state: MainViewModelStore.State) {
-        when(state) {
-            MainViewModelStore.State.Idle -> { }
+        when (state) {
+            MainViewModelStore.State.Idle -> {}
             is MainViewModelStore.State.OriginalSearchQuery -> onOriginalSearchQuery(state)
+            is MainViewModelStore.State.Error -> onError(state)
+            MainViewModelStore.State.InProgress -> onInProgress(state)
+            is MainViewModelStore.State.Response -> onResponse(state)
         }
     }
 
+    private fun onError(state: MainViewModelStore.State.Error) {
+        runOnUiThread { Toast.makeText(this, state.throwable.message, Toast.LENGTH_LONG).show() }
+    }
+
+    private fun onInProgress(state: MainViewModelStore.State) {
+        println(state)
+    }
+
+    private fun onResponse(state: MainViewModelStore.State.Response) {
+        println(state)
+    }
+
     private fun onOriginalSearchQuery(state: MainViewModelStore.State.OriginalSearchQuery) {
-        (binding.appBarMain.searchView as SearchView).setQuery(state.query, false)
+        binding.appBarMain.searchView.setQuery(state.query, false)
     }
 
     private fun submitQueryText(query: String?) {

@@ -133,11 +133,7 @@ class MainInteractionTest : DefaultUnitTest() {
     }
 
     private fun sendResponse(state: MainRepositoryStore.State) {
-        stateFlow.tryEmit(state)
+        stateFlow.value = state
         runBlocking { coroutineScope.testScheduler.advanceUntilIdle() }
-    }
-
-    companion object {
-        private const val text = "keywords"
     }
 }

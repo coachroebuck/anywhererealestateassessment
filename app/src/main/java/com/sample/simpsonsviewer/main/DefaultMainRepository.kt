@@ -89,6 +89,6 @@ class DefaultMainRepository(
     }
 
     private fun sendResponse(state: MainRepositoryStore.State) {
-        coroutineScope.launch { _stateFlow.emit(state) }
+        coroutineScope.launch { _stateFlow.tryEmit(state) }
     }
 }
