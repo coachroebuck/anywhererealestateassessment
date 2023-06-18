@@ -1,23 +1,16 @@
 package com.sample.simpsonsviewer
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.Toast
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.navigation.NavigationView
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.sample.simpsonsviewer.databinding.ActivityMainBinding
-import com.sample.simpsonsviewer.main.mvi.MainViewModelStore
 import com.sample.simpsonsviewer.main.MainViewModel
+import com.sample.simpsonsviewer.main.mvi.MainViewModelStore
+import com.sample.simpsonsviewer.ui.details.DetailsFragment
+import com.sample.simpsonsviewer.ui.list.ListFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -27,16 +20,36 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var viewModel: MainViewModel
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
         setSupportActionBar(binding.appBarMain.toolbar)
 
         viewModel.onCreate(savedInstanceState)
+
+        val isTablet = resources.getBoolean(R.bool.isTablet)
+
+        if (isTablet) {
+            setContentView(R.layout.activity_main_tablet)
+
+            // Tablet layout: Add both fragments to the container
+            val fragmentManager: FragmentManager = supportFragmentManager
+            fragmentManager.beginTransaction()
+                .add(R.id.list_container, ListFragment())
+                .add(R.id.detail_container, DetailsFragment())
+                .commit()
+        } else {
+            setContentView(R.layout.activity_main)
+
+            // Phone layout: Add only the list fragment to the container
+            val fragmentManager: FragmentManager = supportFragmentManager
+            fragmentManager.beginTransaction()
+                .add(R.id.container, ListFragment())
+                .commit()
+        }
+
         binding.appBarMain.searchView.apply {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
@@ -49,35 +62,6 @@ class MainActivity : AppCompatActivity() {
                     return true
                 }
             })
-        }
-        binding.appBarMain.fab?.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
-
-        val navHostFragment =
-            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment?)!!
-        val navController = navHostFragment.navController
-
-        binding.navView?.let {
-            appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.nav_transform, R.id.nav_reflow, R.id.nav_slideshow, R.id.nav_settings
-                ),
-                binding.drawerLayout
-            )
-            setupActionBarWithNavController(navController, appBarConfiguration)
-            it.setupWithNavController(navController)
-        }
-
-        binding.appBarMain.contentMain.bottomNavView?.let {
-            appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.nav_transform, R.id.nav_reflow, R.id.nav_slideshow
-                )
-            )
-            setupActionBarWithNavController(navController, appBarConfiguration)
-            it.setupWithNavController(navController)
         }
 
         lifecycleScope.launch {
@@ -119,34 +103,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun submitQueryText(query: String?) {
         viewModel.emit(MainViewModelStore.Intent.SubmitQueryText(query))
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val result = super.onCreateOptionsMenu(menu)
-        // Using findViewById because NavigationView exists in different layout files
-        // between w600dp and w1240dp
-        val navView: NavigationView? = findViewById(R.id.nav_view)
-        if (navView == null) {
-            // The navigation drawer already has the items including the items in the overflow menu
-            // We only inflate the overflow menu if the navigation drawer isn't visible
-            menuInflater.inflate(R.menu.overflow, menu)
-        }
-        return result
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_settings -> {
-                val navController = findNavController(R.id.nav_host_fragment_content_main)
-                navController.navigate(R.id.nav_settings)
-            }
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
