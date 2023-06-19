@@ -6,66 +6,66 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ServiceResponse (
     @SerialName("Abstract")
-    val abstract: String,
+    val abstract: String? = null,
 
     @SerialName("AbstractSource")
-    val abstractSource: String,
+    val abstractSource: String? = null,
 
     @SerialName("AbstractText")
-    val abstractText: String,
+    val abstractText: String? = null,
 
     @SerialName("AbstractURL")
-    val abstractURL: String,
+    val abstractURL: String? = null,
 
     @SerialName("Answer")
-    val answer: String,
+    val answer: String? = null,
 
     @SerialName("AnswerType")
-    val answerType: String,
+    val answerType: String? = null,
 
     @SerialName("Definition")
-    val definition: String,
+    val definition: String? = null,
 
     @SerialName("DefinitionSource")
-    val definitionSource: String,
+    val definitionSource: String? = null,
 
     @SerialName("DefinitionURL")
-    val definitionURL: String,
+    val definitionURL: String? = null,
 
     @SerialName("Entity")
-    val entity: String,
+    val entity: String? = null,
 
     @SerialName("Heading")
-    val heading: String,
+    val heading: String? = null,
 
     @SerialName("Image")
-    val image: String,
+    val image: String? = null,
 
     @SerialName("ImageHeight")
-    val imageHeight: Long,
+    val imageHeight: String? = null,
 
     @SerialName("ImageIsLogo")
-    val imageIsLogo: Long,
+    val imageIsLogo: String? = null,
 
     @SerialName("ImageWidth")
-    val imageWidth: Long,
+    val imageWidth: String? = null,
 
     @SerialName("Infobox")
-    val infobox: String,
+    val infobox: String? = null,
 
     @SerialName("Redirect")
-    val redirect: String,
+    val redirect: String? = null,
 
     @SerialName("RelatedTopics")
-    val relatedTopics: List<RelatedTopic>,
+    val relatedTopics: List<RelatedTopic> = listOf(),
 
     @SerialName("Results")
-    val results: List<String?>,
+    val results: List<String?> = listOf(),
 
     @SerialName("Type")
-    val type: String,
+    val type: String? = null,
 
-    val meta: Meta
+    val meta: Meta? = null,
 )
 
 @Serializable
@@ -76,146 +76,146 @@ data class Meta (
     @SerialName("created_date")
     val createdDate: String? = null,
 
-    val description: String,
+    val description: String? = null,
     val designer: String? = null,
 
     @SerialName("dev_date")
     val devDate: String? = null,
 
     @SerialName("dev_milestone")
-    val devMilestone: String,
+    val devMilestone: String? = null,
 
-    val developer: List<Developer>,
+    val developer: List<Developer> = listOf(),
 
     @SerialName("example_query")
-    val exampleQuery: String,
+    val exampleQuery: String? = null,
 
-    val id: String,
+    val id: String? = null,
 
     @SerialName("is_stackexchange")
     val isStackexchange: String? = null,
 
     @SerialName("js_callback_name")
-    val jsCallbackName: String,
+    val jsCallbackName: String? = null,
 
     @SerialName("live_date")
     val liveDate: String? = null,
 
-    val maintainer: Maintainer,
-    val name: String,
+    val maintainer: Maintainer? = null,
+    val name: String? = null,
 
     @SerialName("perl_module")
-    val perlModule: String,
+    val perlModule: String? = null,
 
     val producer: String? = null,
 
     @SerialName("production_state")
-    val productionState: String,
+    val productionState: String? = null,
 
-    val repo: String,
+    val repo: String? = null,
 
     @SerialName("signal_from")
-    val signalFrom: String,
+    val signalFrom: String? = null,
 
     @SerialName("src_domain")
-    val srcDomain: String,
+    val srcDomain: String? = null,
 
     @SerialName("src_id")
-    val srcID: Long,
+    val srcID: Long? = null,
 
     @SerialName("src_name")
-    val srcName: String,
+    val srcName: String? = null,
 
     @SerialName("src_options")
-    val srcOptions: SrcOptions,
+    val srcOptions: SrcOptions? = null,
 
     @SerialName("src_url")
     val srcURL: String? = null,
 
-    val status: String,
-    val tab: String,
-    val topic: List<String>,
-    val unsafe: Long
+    val status: String? = null,
+    val tab: String? = null,
+    val topic: List<String> = listOf(),
+    val unsafe: Long? = null
 )
 
 @Serializable
 data class Developer (
-    val name: String,
-    val type: String,
-    val url: String
+    val name: String? = null,
+    val type: String? = null,
+    val url: String? = null
 )
 
 @Serializable
 data class Maintainer (
-    val github: String
+    val github: String? = null
 )
 
 @Serializable
 data class SrcOptions (
-    val directory: String,
+    val directory: String? = null,
 
     @SerialName("is_fanon")
-    val isFanon: Long,
+    val isFanon: Long? = null,
 
     @SerialName("is_mediawiki")
-    val isMediawiki: Long,
+    val isMediawiki: Long? = null,
 
     @SerialName("is_wikipedia")
-    val isWikipedia: Long,
+    val isWikipedia: Long? = null,
 
-    val language: String,
+    val language: String? = null,
 
     @SerialName("min_abstract_length")
-    val minAbstractLength: String,
+    val minAbstractLength: String? = null,
 
     @SerialName("skip_abstract")
-    val skipAbstract: Long,
+    val skipAbstract: Long? = null,
 
     @SerialName("skip_abstract_paren")
-    val skipAbstractParen: Long,
+    val skipAbstractParen: Long? = null,
 
     @SerialName("skip_end")
-    val skipEnd: String,
+    val skipEnd: String? = null,
 
     @SerialName("skip_icon")
-    val skipIcon: Long,
+    val skipIcon: Long? = null,
 
     @SerialName("skip_image_name")
-    val skipImageName: Long,
+    val skipImageName: Long? = null,
 
     @SerialName("skip_qr")
-    val skipQr: String,
+    val skipQr: String? = null,
 
     @SerialName("source_skip")
-    val sourceSkip: String,
+    val sourceSkip: String? = null,
 
     @SerialName("src_info")
-    val srcInfo: String
+    val srcInfo: String? = null
 )
 
 @Serializable
 data class RelatedTopic (
     @SerialName("FirstURL")
-    val firstURL: String,
+    val firstURL: String? = null,
 
     @SerialName("Icon")
-    val icon: Icon,
+    val icon: Icon? = null,
 
     @SerialName("Result")
-    val result: String,
+    val result: String? = null,
 
     @SerialName("Text")
-    val text: String
+    val text: String? = null
 )
 
 @Serializable
 data class Icon (
     @SerialName("Height")
-    val height: String,
+    val height: String? = null,
 
     @SerialName("URL")
-    val url: String,
+    val url: String? = null,
 
     @SerialName("Width")
-    val width: String
+    val width: String? = null
 )

@@ -1,5 +1,6 @@
 package com.sample.simpsonsviewer.main
 
+import com.sample.simpsonsviewer.BuildConfig.KEYWORDS
 import com.sample.simpsonsviewer.main.mvi.MainInteractionStore
 import com.sample.simpsonsviewer.main.mvi.MainRepositoryStore
 import com.sample.simpsonsviewer.model.ServiceResponse
@@ -30,11 +31,40 @@ class DefaultMainInteraction(
     override fun emit(intent: MainInteractionStore.Intent) {
         when (intent) {
             is MainInteractionStore.Intent.Search -> onSearch(intent)
+            MainInteractionStore.Intent.Retrieve -> onRetrieve()
         }
     }
 
+    private fun onRetrieve() {
+        repository.emit(MainRepositoryStore.Intent.Search(KEYWORDS))
+    }
+
     private fun onSearch(intent: MainInteractionStore.Intent.Search) {
-        repository.emit(MainRepositoryStore.Intent.Search(intent.query))
+        val mutableList = mutableListOf<ServiceResponseSummary>()
+
+        response?.relatedTopics?.map { relatedTopic ->
+            relatedTopic.firstURL?.let { firstURL ->
+                val index = firstURL.lastIndexOf('/')
+                val title = firstURL.substring(index).replace("_", " ")
+                val details = relatedTopic.text
+                val url = relatedTopic.firstURL
+                val icon = "$domain${relatedTopic.icon?.url}"
+
+                intent.query?.let {
+                    if (title.contains(it)) {
+                        mutableList.add(
+                            ServiceResponseSummary(
+                                title = title,
+                                details = details ?: "",
+                                url = url,
+                                icon = icon,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+        sendResponse(MainInteractionStore.State.Success(mutableList.toList()))
     }
 
     private fun onResponseReceived(response: MainRepositoryStore.State) {
@@ -78,20 +108,22 @@ class DefaultMainInteraction(
 
 URL of /i/cb4121fd.png" => https://duckduckgo.com/i/cb4121fd.png
              */
-            val index = it.firstURL.lastIndexOf('/')
-            val title = it.firstURL.substring(index).replace("_", " ")
-            val details = it.text
-            val url = it.firstURL
-            val icon = "$domain${it.icon.url}"
+            it.firstURL?.let { firstURL ->
+                val index = firstURL.lastIndexOf('/')
+                val title = firstURL.substring(index).replace("_", " ")
+                val details = it.text
+                val url = it.firstURL
+                val icon = "$domain${it.icon?.url}"
 
-            mutableList.add(
-                ServiceResponseSummary(
-                    title = title,
-                    details = details,
-                    url = url,
-                    icon = icon,
+                mutableList.add(
+                    ServiceResponseSummary(
+                        title = title,
+                        details = details ?: "",
+                        url = url,
+                        icon = icon,
+                    )
                 )
-            )
+            }
         }
         sendResponse(MainInteractionStore.State.Success(mutableList.toList()))
     }

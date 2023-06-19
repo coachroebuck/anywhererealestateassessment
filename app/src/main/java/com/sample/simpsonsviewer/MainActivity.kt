@@ -1,11 +1,16 @@
 package com.sample.simpsonsviewer
 
 import android.os.Bundle
+import android.view.View
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.sample.simpsonsviewer.databinding.ActivityMainBinding
 import com.sample.simpsonsviewer.main.MainViewModel
 import com.sample.simpsonsviewer.main.mvi.MainViewModelStore
@@ -18,6 +23,8 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    private var isTablet: Boolean = true
+
     @Inject
     lateinit var viewModel: MainViewModel
     private lateinit var binding: ActivityMainBinding
@@ -25,11 +32,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setSupportActionBar(binding.appBarMain.toolbar)
 
         viewModel.onCreate(savedInstanceState)
 
-        val isTablet = resources.getBoolean(R.bool.isTablet)
+        isTablet = resources.getBoolean(R.bool.isTablet)
 
         if (isTablet) {
             setContentView(R.layout.activity_main_tablet)
@@ -49,6 +55,7 @@ class MainActivity : AppCompatActivity() {
                 .add(R.id.container, ListFragment())
                 .commit()
         }
+        setSupportActionBar(binding.appBarMain.toolbar)
 
         binding.appBarMain.searchView.apply {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
@@ -65,14 +72,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.stateFlow.collect { value ->
-                onStateReceived(state = value)
+            retrieveInformation()
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.stateFlow.collect { value ->
+                    onStateReceived(state = value)
+                }
             }
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        viewModel.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        viewModel.onRestoreInstanceState(savedInstanceState)
+    }
+
+    private fun retrieveInformation() {
+        viewModel.emit(MainViewModelStore.Intent.RetrieveInformation)
+    }
+
     private fun queryTextChange(text: String?) {
-        viewModel.emit(MainViewModelStore.Intent.OnSearchQueryChanged(text))
+        emit(MainViewModelStore.Intent.OnSearchQueryChanged(text))
     }
 
     private fun onStateReceived(state: MainViewModelStore.State) {
@@ -87,14 +111,50 @@ class MainActivity : AppCompatActivity() {
 
     private fun onError(state: MainViewModelStore.State.Error) {
         runOnUiThread { Toast.makeText(this, state.throwable.message, Toast.LENGTH_LONG).show() }
+        enableUserInteraction()
     }
 
     private fun onInProgress(state: MainViewModelStore.State) {
-        println(state)
+        disableUserInteraction()
     }
 
     private fun onResponse(state: MainViewModelStore.State.Response) {
-        println(state)
+        enableUserInteraction()
+    }
+
+    private fun disableUserInteraction() {
+        runOnUiThread {
+            binding.appBarMain.searchView.isEnabled = false
+            binding.progressIndicator.isVisible = true
+            findViewById<View>(R.id.progressIndicator).isVisible = true
+
+            if (isTablet) {
+                findViewById<View>(R.id.list_container).isVisible = false
+                findViewById<View>(R.id.detail_container).isVisible = false
+            } else {
+                findViewById<View>(R.id.container).isVisible = false
+            }
+            window.setFlags(
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+            )
+        }
+    }
+
+    private fun enableUserInteraction() {
+        runOnUiThread {
+            binding.appBarMain.searchView.isEnabled = true
+            binding.progressIndicator.isVisible = false
+            findViewById<View>(R.id.progressIndicator).isVisible = false
+
+            if (isTablet) {
+                findViewById<View>(R.id.list_container).isVisible = true
+                findViewById<View>(R.id.detail_container).isVisible = true
+            } else {
+                findViewById<View>(R.id.container).isVisible = true
+            }
+            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        }
     }
 
     private fun onOriginalSearchQuery(state: MainViewModelStore.State.OriginalSearchQuery) {
@@ -102,16 +162,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun submitQueryText(query: String?) {
-        viewModel.emit(MainViewModelStore.Intent.SubmitQueryText(query))
+        emit(MainViewModelStore.Intent.SubmitQueryText(query))
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        viewModel.onSaveInstanceState(outState)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        viewModel.onRestoreInstanceState(savedInstanceState)
+    private fun emit(intent: MainViewModelStore.Intent) {
+        viewModel.emit(intent)
     }
 }

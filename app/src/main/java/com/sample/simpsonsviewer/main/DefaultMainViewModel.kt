@@ -62,8 +62,14 @@ class DefaultMainViewModel(
             when (intent) {
                 is MainViewModelStore.Intent.OnSearchQueryChanged -> onOnSearchQueryChanged(intent)
                 is MainViewModelStore.Intent.SubmitQueryText -> onSubmitQueryText(intent)
+                MainViewModelStore.Intent.RetrieveInformation -> onRetrieveInformation()
             }
         }
+    }
+
+    private fun onRetrieveInformation() {
+        sendResponse(MainViewModelStore.State.InProgress)
+        emit(MainInteractionStore.Intent.Retrieve)
     }
 
     private fun onOnSearchQueryChanged(intent: MainViewModelStore.Intent.OnSearchQueryChanged) {
@@ -71,7 +77,11 @@ class DefaultMainViewModel(
     }
 
     private fun onSubmitQueryText(intent: MainViewModelStore.Intent.SubmitQueryText) {
-        interaction.emit(MainInteractionStore.Intent.Search(intent.query))
+        emit(MainInteractionStore.Intent.Search(intent.query))
+    }
+
+    private fun emit(intent: MainInteractionStore.Intent) {
+        interaction.emit(intent)
     }
 
     @SuppressLint("NewApi")

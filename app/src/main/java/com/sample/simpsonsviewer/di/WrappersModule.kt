@@ -35,7 +35,7 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object WrappersModule {
-    private const val protocol = "http://"
+    private const val protocol = "https://"
     private const val domain = "api.duckduckgo.com"
 
     @Singleton

@@ -5,6 +5,8 @@ import com.sample.simpsonsviewer.model.ServiceResponseSummaryList
 
 sealed interface MainViewModelStore {
     sealed interface Intent {
+        object RetrieveInformation : Intent
+
         data class OnSearchQueryChanged(val query: String?): Intent
         data class SubmitQueryText(val query: String?): Intent
     }

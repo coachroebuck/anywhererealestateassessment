@@ -4,6 +4,8 @@ import com.sample.simpsonsviewer.model.ServiceResponseSummary
 
 sealed interface MainInteractionStore {
     sealed interface Intent {
+        object Retrieve : Intent
+
         data class Search(val query: String?): Intent
     }
     sealed interface State {

@@ -23,7 +23,7 @@ class MainInteractionTest : DefaultUnitTest() {
     private lateinit var interaction: MainInteraction
     private val stateFlow: MutableStateFlow<MainRepositoryStore.State> =
         MutableStateFlow(MainRepositoryStore.State.Idle)
-    private val domain = "https://duckduckgo.com"
+    private val domain = "api.duckduckgo.com"
     private val mainRepositoryStoreIntent = slot<MainRepositoryStore.Intent>()
 
     @Before

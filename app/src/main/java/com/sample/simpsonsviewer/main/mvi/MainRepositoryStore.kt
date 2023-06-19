@@ -4,7 +4,7 @@ import com.sample.simpsonsviewer.model.ServiceResponse
 
 sealed interface MainRepositoryStore {
     sealed interface Intent {
-        data class Search(val query: String?): Intent
+        data class Search(val query: String? = null): Intent
     }
     sealed interface State {
         object Idle : State

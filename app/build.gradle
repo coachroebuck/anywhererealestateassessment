@@ -48,12 +48,12 @@ android {
         create("simpsons") {
             dimension = "version"
             isDefault true
-            buildConfigField "String", "KEYWORDS", "\"simpsons+characters\""
+            buildConfigField "String", "KEYWORDS", "\" simpsons characters\""
         }
         create("wire") {
             dimension = "version"
             isDefault true
-            buildConfigField "String", "KEYWORDS", "\"the+wire+characters\""
+            buildConfigField "String", "KEYWORDS", "\"the+wire characters\""
         }
     }
     lint {
