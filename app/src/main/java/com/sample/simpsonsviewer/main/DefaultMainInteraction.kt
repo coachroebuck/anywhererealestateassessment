@@ -110,8 +110,9 @@ URL of /i/cb4121fd.png" => https://duckduckgo.com/i/cb4121fd.png
         val details = it.text?.replace("$title - ", "")
         val url = it.firstURL
         val icon = "$domain${it.icon?.url}"
+        val isFound = text?.let { it1 -> title.lowercase().contains(it1.lowercase()) } ?: true
 
-        if(text == null || title.contains(text)) {
+        if(isFound) {
             mutableList.add(
                 ServiceResponseSummary(
                     title = title,

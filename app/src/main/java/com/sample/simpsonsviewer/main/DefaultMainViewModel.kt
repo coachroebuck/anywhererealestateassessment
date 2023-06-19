@@ -74,6 +74,7 @@ class DefaultMainViewModel(
 
     private fun onOnSearchQueryChanged(intent: MainViewModelStore.Intent.OnSearchQueryChanged) {
         _query = intent.query ?: ""
+        emit(MainInteractionStore.Intent.Search(intent.query))
     }
 
     private fun onSubmitQueryText(intent: MainViewModelStore.Intent.SubmitQueryText) {

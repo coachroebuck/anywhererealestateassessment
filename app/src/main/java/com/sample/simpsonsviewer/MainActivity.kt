@@ -57,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         }
         setSupportActionBar(binding.appBarMain.toolbar)
 
-        binding.appBarMain.searchView.apply {
+        findViewById<SearchView>(R.id.searchView).apply {
             setOnQueryTextListener(object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     submitQueryText(query)
