@@ -112,19 +112,21 @@ class DefaultMainViewModel(
             _query = bundle.getString(SearchQueryKey, "")
             selectedTitle = bundle.getString(SelectedTitleKey, "")
 
-            if (sdkVersion >= tiramisuVersion) {
-                (bundle.getSerializable(
-                    ServiceResponseModelKey,
-                    ServiceResponseSummaryList::class.java
-                ))
-            } else {
-                (bundle.getSerializable(
-                    ServiceResponseModelKey
-                ))
-                        as ServiceResponseSummaryList?
-            }?.let {
-                response = MainInteractionStore.State.Success(it.list)
-                sendResponse(MainViewModelStore.State.Response(it))
+            if(bundle.containsKey(ServiceResponseModelKey)) {
+                if (sdkVersion >= tiramisuVersion) {
+                    (bundle.getSerializable(
+                        ServiceResponseModelKey,
+                        ServiceResponseSummaryList::class.java
+                    ))
+                } else {
+                    (bundle.getSerializable(
+                        ServiceResponseModelKey
+                    ))
+                            as ServiceResponseSummaryList?
+                }?.let {
+                    response = MainInteractionStore.State.Success(it.list)
+                    sendResponse(MainViewModelStore.State.Response(it))
+                }
             }
 
             if (bundle.containsKey(InProgressKey)) {

@@ -9,6 +9,7 @@ import com.sample.simpsonsviewer.main.mvi.MainViewModelStore
 import com.sample.simpsonsviewer.model.ServiceResponseSummary
 import com.sample.simpsonsviewer.model.ServiceResponseSummaryList
 import com.sample.simpsonsviewer.DefaultUnitTest
+import com.sample.simpsonsviewer.main.DefaultMainViewModel.Companion.SelectedTitleKey
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -75,12 +76,8 @@ class MainViewModelTest : DefaultUnitTest() {
 
     @Test
     fun `GIVEN invoke onCreate WHEN bundle contains SearchQueryKey THEN verify correct state`() {
-        every {
-            bundle.containsKey(SearchQueryKey)
-        } answers { return@answers true }
         every { bundle.getString(SearchQueryKey, "") } answers { return@answers text }
         every { bundle.getString(SearchQueryKey) } answers { return@answers text }
-
         onCreate()
 
         validateEquality(
