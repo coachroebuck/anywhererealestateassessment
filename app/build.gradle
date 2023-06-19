@@ -49,11 +49,15 @@ android {
             dimension = "version"
             isDefault true
             buildConfigField "String", "KEYWORDS", "\" simpsons characters\""
+            applicationId "com.example.simpsonsviewer"
+            resValue "string", "app_name", "Simpsons Character Viewer"
         }
         create("wire") {
             dimension = "version"
             isDefault true
-            buildConfigField "String", "KEYWORDS", "\"the+wire characters\""
+            buildConfigField "String", "KEYWORDS", "\"the wire characters\""
+            applicationId "com.example.wireviewer"
+            resValue "string", "app_name", "Wire Character Viewer"
         }
     }
     lint {
