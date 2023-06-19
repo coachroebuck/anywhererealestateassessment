@@ -89,21 +89,4 @@ class DetailsFragment : Fragment() {
         serviceResponseSummary = state.selectedItem
         requireActivity().runOnUiThread { loadDetails() }
     }
-    
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param item ServiceResponseSummary.
-         * @return A new instance of fragment DetailsFragment.
-         */
-        @JvmStatic
-        fun newInstance(item: ServiceResponseSummary) =
-            DetailsFragment().apply {
-                arguments = Bundle().apply {
-                    putSerializable(ServiceResponseSummaryKey, item)
-                }
-            }
-    }
 }
