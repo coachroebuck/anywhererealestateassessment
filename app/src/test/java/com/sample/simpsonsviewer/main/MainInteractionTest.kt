@@ -112,16 +112,17 @@ class MainInteractionTest : DefaultUnitTest() {
             for(i in 0 until summary.data.size) {
                 model?.relatedTopics?.get(i)?.let { expectation ->
                     val actual = summary.data[i]
-                    val index = expectation.firstURL.lastIndexOf('/')
-                    val title = expectation.firstURL.substring(index).replace("_", " ")
-                    val details = expectation.text
-                    val url = expectation.firstURL
-                    val icon = "$domain${expectation.icon.url}"
+                    expectation.firstURL?.lastIndexOf('/')?.let { index ->
+                        val title = expectation.firstURL?.substring(index)?.replace("_", " ")
+                        val details = expectation.text
+                        val url = expectation.firstURL
+                        val icon = "$domain${expectation.icon?.url}"
 
-                    validateEquality(title, actual.title)
-                    validateEquality(details, actual.details)
-                    validateEquality(url, actual.url)
-                    validateEquality(icon, actual.icon)
+                        validateEquality(title, actual.title)
+                        validateEquality(details, actual.details)
+                        validateEquality(url, actual.url)
+                        validateEquality(icon, actual.icon)
+                    }
                 }
             }
         }

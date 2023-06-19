@@ -3,6 +3,7 @@ package com.sample.simpsonsviewer.main
 import com.sample.simpsonsviewer.BuildConfig.KEYWORDS
 import com.sample.simpsonsviewer.main.mvi.MainInteractionStore
 import com.sample.simpsonsviewer.main.mvi.MainRepositoryStore
+import com.sample.simpsonsviewer.model.RelatedTopic
 import com.sample.simpsonsviewer.model.ServiceResponse
 import com.sample.simpsonsviewer.model.ServiceResponseSummary
 import kotlinx.coroutines.CoroutineScope
@@ -44,24 +45,7 @@ class DefaultMainInteraction(
 
         response?.relatedTopics?.map { relatedTopic ->
             relatedTopic.firstURL?.let { firstURL ->
-                val index = firstURL.lastIndexOf('/')
-                val title = firstURL.substring(index).replace("_", " ")
-                val details = relatedTopic.text
-                val url = relatedTopic.firstURL
-                val icon = "$domain${relatedTopic.icon?.url}"
-
-                intent.query?.let {
-                    if (title.contains(it)) {
-                        mutableList.add(
-                            ServiceResponseSummary(
-                                title = title,
-                                details = details ?: "",
-                                url = url,
-                                icon = icon,
-                            )
-                        )
-                    }
-                }
+                addSummary(firstURL, relatedTopic, mutableList, intent.query)
             }
         }
         sendResponse(MainInteractionStore.State.Success(mutableList.toList()))
@@ -92,7 +76,7 @@ class DefaultMainInteraction(
         val mutableList = mutableListOf<ServiceResponseSummary>()
         this.response = response.data
 
-        response.data?.relatedTopics?.map {
+        response.data?.relatedTopics?.map { relatedTopic ->
             /*
             Example Model:
             {
@@ -108,24 +92,35 @@ class DefaultMainInteraction(
 
 URL of /i/cb4121fd.png" => https://duckduckgo.com/i/cb4121fd.png
              */
-            it.firstURL?.let { firstURL ->
-                val index = firstURL.lastIndexOf('/')
-                val title = firstURL.substring(index).replace("_", " ")
-                val details = it.text
-                val url = it.firstURL
-                val icon = "$domain${it.icon?.url}"
-
-                mutableList.add(
-                    ServiceResponseSummary(
-                        title = title,
-                        details = details ?: "",
-                        url = url,
-                        icon = icon,
-                    )
-                )
+            relatedTopic.firstURL?.let { firstURL ->
+                addSummary(firstURL, relatedTopic, mutableList)
             }
         }
         sendResponse(MainInteractionStore.State.Success(mutableList.toList()))
+    }
+
+    private fun addSummary(
+        firstURL: String,
+        it: RelatedTopic,
+        mutableList: MutableList<ServiceResponseSummary>,
+        text: String? = null,
+    ) {
+        val index = firstURL.lastIndexOf('/')
+        val title = firstURL.substring(index + 1).replace("_", " ")
+        val details = it.text?.replace("$title - ", "")
+        val url = it.firstURL
+        val icon = "$domain${it.icon?.url}"
+
+        if(text == null || title.contains(text)) {
+            mutableList.add(
+                ServiceResponseSummary(
+                    title = title,
+                    details = details ?: "",
+                    url = url,
+                    icon = icon,
+                )
+            )
+        }
     }
 
     private fun sendResponse(state: MainInteractionStore.State) {
