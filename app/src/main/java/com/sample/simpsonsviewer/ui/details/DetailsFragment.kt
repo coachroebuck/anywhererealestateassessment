@@ -5,28 +5,37 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.bumptech.glide.Glide
 import com.sample.simpsonsviewer.R
+import com.sample.simpsonsviewer.main.MainViewModel
+import com.sample.simpsonsviewer.main.mvi.MainViewModelStore
+import com.sample.simpsonsviewer.model.ServiceResponseSummary
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val ServiceResponseSummaryKey = "ServiceResponseSummary"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [DetailsFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+
+@AndroidEntryPoint
 class DetailsFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
+    @Inject
+    lateinit var viewModel: MainViewModel
+
+    private var serviceResponseSummary: ServiceResponseSummary? = null
+    private lateinit var title: TextView
+    private lateinit var details: TextView
+    private lateinit var icon: ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getString(ARG_PARAM1) ?: "Title"
-            param2 = it.getString(ARG_PARAM2) ?: "Details"
+            serviceResponseSummary = it.getSerializable(ServiceResponseSummaryKey) as ServiceResponseSummary?
         }
     }
 
@@ -38,22 +47,62 @@ class DetailsFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_details, container, false)
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.stateFlow.collect { value ->
+                    onStateReceived(state = value)
+                }
+            }
+        }
+        title = view.findViewById(R.id.title)
+        details = view.findViewById(R.id.details)
+        icon = view.findViewById(R.id.imageView)
+
+        loadDetails()
+    }
+
+    private fun loadDetails() {
+
+        title.text = serviceResponseSummary?.title
+        details.text = serviceResponseSummary?.details
+        Glide.with(icon)
+            .load(serviceResponseSummary?.icon)
+            .error(R.drawable.photo_not_available)
+            .into(icon)
+    }
+
+    private fun onStateReceived(state: MainViewModelStore.State) {
+        when(state) {
+            is MainViewModelStore.State.Error -> { }
+            MainViewModelStore.State.Idle -> { }
+            MainViewModelStore.State.InProgress -> { }
+            is MainViewModelStore.State.OriginalSearchQuery -> { }
+            is MainViewModelStore.State.Response -> {  }
+            is MainViewModelStore.State.ItemSelected -> { onItemSelected(state) }
+        }
+    }
+
+    private fun onItemSelected(state: MainViewModelStore.State.ItemSelected) {
+        serviceResponseSummary = state.selectedItem
+        requireActivity().runOnUiThread { loadDetails() }
+    }
+    
     companion object {
         /**
          * Use this factory method to create a new instance of
          * this fragment using the provided parameters.
          *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
+         * @param item ServiceResponseSummary.
          * @return A new instance of fragment DetailsFragment.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
+        fun newInstance(item: ServiceResponseSummary) =
             DetailsFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+                    putSerializable(ServiceResponseSummaryKey, item)
                 }
             }
     }

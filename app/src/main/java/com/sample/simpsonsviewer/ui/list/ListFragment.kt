@@ -29,14 +29,6 @@ class ListFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private var columnCount = 1
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        arguments?.let {
-            columnCount = it.getInt(ARG_COLUMN_COUNT)
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -75,25 +67,17 @@ class ListFragment : Fragment() {
             MainViewModelStore.State.InProgress -> { }
             is MainViewModelStore.State.OriginalSearchQuery -> { }
             is MainViewModelStore.State.Response -> { onResponse(state) }
+            is MainViewModelStore.State.ItemSelected -> { }
         }
     }
 
     private fun onResponse(state: MainViewModelStore.State.Response) {
-        recyclerView.adapter = SummaryRecyclerViewAdapter(state.data.list)
+        recyclerView.adapter = SummaryRecyclerViewAdapter(state.data.list) {
+            onItemSelected(it)
+        }
     }
 
-    companion object {
-
-        // TODO: Customize parameter argument names
-        const val ARG_COLUMN_COUNT = "column-count"
-
-        // TODO: Customize parameter initialization
-        @JvmStatic
-        fun newInstance(columnCount: Int) =
-            ListFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_COLUMN_COUNT, columnCount)
-                }
-            }
+    private fun onItemSelected(title: String) {
+        viewModel.emit(MainViewModelStore.Intent.TitleSelected(title))
     }
 }

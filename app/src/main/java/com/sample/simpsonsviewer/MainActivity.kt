@@ -4,8 +4,11 @@ import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import android.window.OnBackInvokedDispatcher
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.core.os.BuildCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.Lifecycle
@@ -20,6 +23,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+@BuildCompat.PrereleaseSdkCheck
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
@@ -79,6 +84,34 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+
+        if (BuildCompat.isAtLeastT()) {
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT
+            ) {
+                postBackPressed()
+            }
+        } else {
+            onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    postBackPressed()
+                }
+            })
+        }
+    }
+
+    private fun postBackPressed() {
+        val fragmentManager: FragmentManager = supportFragmentManager
+
+        // Check if the DetailsFragment is currently displayed
+        val detailsFragment = fragmentManager.findFragmentById(R.id.container)
+        if (detailsFragment is DetailsFragment) {
+            // Pop the DetailsFragment from the back stack
+            fragmentManager.popBackStack()
+        } else {
+            // No DetailsFragment found, proceed with default back button behavior
+            super.onBackPressed()
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -104,8 +137,19 @@ class MainActivity : AppCompatActivity() {
             MainViewModelStore.State.Idle -> {}
             is MainViewModelStore.State.OriginalSearchQuery -> onOriginalSearchQuery(state)
             is MainViewModelStore.State.Error -> onError(state)
-            MainViewModelStore.State.InProgress -> onInProgress(state)
-            is MainViewModelStore.State.Response -> onResponse(state)
+            MainViewModelStore.State.InProgress -> onInProgress()
+            is MainViewModelStore.State.Response -> onResponse()
+            is MainViewModelStore.State.ItemSelected -> onItemSelected()
+        }
+    }
+
+    private fun onItemSelected() {
+        if (!isTablet) {
+            val fragmentManager: FragmentManager = supportFragmentManager
+            fragmentManager.beginTransaction()
+                .replace(R.id.container, DetailsFragment())
+                .addToBackStack(null) // Add to back stack to enable back navigation
+                .commit()
         }
     }
 
@@ -114,11 +158,11 @@ class MainActivity : AppCompatActivity() {
         enableUserInteraction()
     }
 
-    private fun onInProgress(state: MainViewModelStore.State) {
+    private fun onInProgress() {
         disableUserInteraction()
     }
 
-    private fun onResponse(state: MainViewModelStore.State.Response) {
+    private fun onResponse() {
         enableUserInteraction()
     }
 

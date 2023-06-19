@@ -6,12 +6,14 @@ sealed interface MainInteractionStore {
     sealed interface Intent {
         object Retrieve : Intent
 
-        data class Search(val query: String?): Intent
+        data class Search(val query: String?) : Intent
     }
+
     sealed interface State {
         object Idle : State
         object InProgress : State
-        data class Success(val data: List<ServiceResponseSummary>): State
-        data class Error(val throwable: Throwable): State
+        data class Success(val data: List<ServiceResponseSummary>) : State
+
+        data class Error(val throwable: Throwable) : State
     }
 }

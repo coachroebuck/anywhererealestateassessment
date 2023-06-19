@@ -11,7 +11,8 @@ import com.sample.simpsonsviewer.databinding.FragmentItemBinding
 import com.sample.simpsonsviewer.model.ServiceResponseSummary
 
 class SummaryRecyclerViewAdapter(
-    private val values: List<ServiceResponseSummary>
+    private val values: List<ServiceResponseSummary>,
+    private val callback: (String) -> Unit,
 ) : RecyclerView.Adapter<SummaryRecyclerViewAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -26,7 +27,7 @@ class SummaryRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(item = values[position])
+        holder.bind(item = values[position], callback = callback)
     }
 
     override fun getItemCount(): Int = values.size
@@ -40,13 +41,14 @@ class SummaryRecyclerViewAdapter(
             return super.toString() + "$title $details"
         }
 
-        fun bind(item: ServiceResponseSummary) {
+        fun bind(item: ServiceResponseSummary, callback: (String) -> Unit) {
             title.text = item.title
             details.text = item.details
             Glide.with(icon)
                 .load(item.icon)
                 .error(R.drawable.photo_not_available)
                 .into(icon)
+            itemView.setOnClickListener { callback(title.text.toString()) }
         }
     }
 

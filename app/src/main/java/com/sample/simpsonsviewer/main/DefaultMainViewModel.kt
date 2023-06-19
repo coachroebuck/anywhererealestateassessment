@@ -18,7 +18,9 @@ class DefaultMainViewModel(
     private val tiramisuVersion: Int = Build.VERSION_CODES.TIRAMISU,
 ) : MainViewModel {
 
+    private var response: MainInteractionStore.State.Success? = null
     private var _query = ""
+    private var selectedTitle = ""
     private val _stateFlow: MutableStateFlow<MainViewModelStore.State> =
         MutableStateFlow(MainViewModelStore.State.Idle)
 
@@ -36,6 +38,9 @@ class DefaultMainViewModel(
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putString(SearchQueryKey, _query)
+        outState.putSerializable(ServiceResponseModelKey,
+            response?.data?.let { ServiceResponseSummaryList(it) })
+        outState.putString(SelectedTitleKey, selectedTitle)
 
         when (_stateFlow.value) {
             MainViewModelStore.State.Idle -> {}
@@ -46,10 +51,9 @@ class DefaultMainViewModel(
             }
 
             MainViewModelStore.State.InProgress -> outState.putBoolean(InProgressKey, true)
-            is MainViewModelStore.State.Response -> {
-                val response = _stateFlow.value as MainViewModelStore.State.Response
-                outState.putSerializable(ServiceResponseModelKey, response.data)
-            }
+            is MainViewModelStore.State.Response -> { }
+
+            is MainViewModelStore.State.ItemSelected -> { }
         }
     }
 
@@ -63,8 +67,14 @@ class DefaultMainViewModel(
                 is MainViewModelStore.Intent.OnSearchQueryChanged -> onOnSearchQueryChanged(intent)
                 is MainViewModelStore.Intent.SubmitQueryText -> onSubmitQueryText(intent)
                 MainViewModelStore.Intent.RetrieveInformation -> onRetrieveInformation()
+                is MainViewModelStore.Intent.TitleSelected -> onTitleSelected(intent)
             }
         }
+    }
+
+    private fun onTitleSelected(intent: MainViewModelStore.Intent.TitleSelected) {
+        val selectedItem = this.response?.data?.firstOrNull { it.title == intent.title }
+        sendResponse(MainViewModelStore.State.ItemSelected(selectedItem))
     }
 
     private fun onRetrieveInformation() {
@@ -92,6 +102,9 @@ class DefaultMainViewModel(
                 _query = bundle.getString(SearchQueryKey, "")
                 sendResponse(MainViewModelStore.State.OriginalSearchQuery(_query))
             }
+            if (bundle.containsKey(SelectedTitleKey)) {
+             selectedTitle = bundle.getString(SelectedTitleKey, "")
+            }
             if (bundle.containsKey(InProgressKey)) {
                 sendResponse(MainViewModelStore.State.InProgress)
             } else if (bundle.containsKey(ErrorMessageKey)) {
@@ -112,6 +125,9 @@ class DefaultMainViewModel(
                     sendResponse(MainViewModelStore.State.Response(list))
                 }
             }
+
+            emit(MainViewModelStore.Intent.OnSearchQueryChanged(_query))
+            emit(MainViewModelStore.Intent.TitleSelected(selectedTitle))
         }
     }
 
@@ -137,6 +153,7 @@ class DefaultMainViewModel(
     }
 
     private fun onSuccess(response: MainInteractionStore.State.Success) {
+        this.response = response
         sendResponse(MainViewModelStore.State.Response(ServiceResponseSummaryList(response.data)))
     }
 
@@ -149,5 +166,6 @@ class DefaultMainViewModel(
         const val ErrorMessageKey = "ErrorMessage"
         const val ServiceResponseModelKey = "ServiceResponseModel"
         const val InProgressKey = "InProgress"
+        const val SelectedTitleKey = "SelectedTitle"
     }
 }
