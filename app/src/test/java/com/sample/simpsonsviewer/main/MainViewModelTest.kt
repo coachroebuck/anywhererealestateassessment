@@ -8,7 +8,7 @@ import com.sample.simpsonsviewer.main.mvi.MainInteractionStore
 import com.sample.simpsonsviewer.main.mvi.MainViewModelStore
 import com.sample.simpsonsviewer.model.ServiceResponseSummary
 import com.sample.simpsonsviewer.model.ServiceResponseSummaryList
-import com.sample.simpsonsviewer.permissions.DefaultUnitTest
+import com.sample.simpsonsviewer.DefaultUnitTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk

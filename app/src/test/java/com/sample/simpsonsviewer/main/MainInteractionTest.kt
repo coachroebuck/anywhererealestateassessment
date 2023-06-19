@@ -1,15 +1,17 @@
 package com.sample.simpsonsviewer.main
 
+import com.sample.simpsonsviewer.BuildConfig
 import com.sample.simpsonsviewer.main.mvi.MainInteractionStore
 import com.sample.simpsonsviewer.main.mvi.MainRepositoryStore
 import com.sample.simpsonsviewer.model.ServiceResponse
-import com.sample.simpsonsviewer.permissions.DefaultUnitTest
+import com.sample.simpsonsviewer.DefaultUnitTest
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
@@ -38,11 +40,17 @@ class MainInteractionTest : DefaultUnitTest() {
             domain = domain,
         )
 
+        coroutineScope.launch {
+            interaction.stateFlow.collect { state ->
+                println(state)
+            }
+        }
+
         every { repository.stateFlow } returns stateFlow
         coEvery { repository.stateFlow } returns stateFlow
         every { repository.emit(capture(mainRepositoryStoreIntent)) } answers { }
         coEvery { repository.emit(capture(mainRepositoryStoreIntent)) } answers { }
-
+        coroutineScope.testScheduler.advanceUntilIdle()
     }
 
     @After
@@ -54,6 +62,16 @@ class MainInteractionTest : DefaultUnitTest() {
     fun `GIVEN invoke emit WHEN intent is Search THEN verify correct state`() {
         emit(MainInteractionStore.Intent.Search(text))
 
+        validateEquality(
+            MainInteractionStore.State.Success::class,
+            interaction.stateFlow.value::class
+        )
+    }
+
+    @Test
+    fun `GIVEN invoke emit WHEN intent is Retrieve THEN verify correct state`() {
+        emit(MainInteractionStore.Intent.Retrieve)
+
         assertTrue(mainRepositoryStoreIntent.isCaptured)
 
         validateEquality(
@@ -62,7 +80,7 @@ class MainInteractionTest : DefaultUnitTest() {
         )
 
         validateEquality(
-            text,
+            BuildConfig.KEYWORDS,
             (mainRepositoryStoreIntent.captured as MainRepositoryStore.Intent.Search).query
         )
     }
@@ -113,8 +131,8 @@ class MainInteractionTest : DefaultUnitTest() {
                 model?.relatedTopics?.get(i)?.let { expectation ->
                     val actual = summary.data[i]
                     expectation.firstURL?.lastIndexOf('/')?.let { index ->
-                        val title = expectation.firstURL?.substring(index)?.replace("_", " ")
-                        val details = expectation.text
+                        val title = expectation.firstURL?.substring(index + 1)?.replace("_", " ")
+                        val details = expectation.text?.replace("$title - ", "")
                         val url = expectation.firstURL
                         val icon = "$domain${expectation.icon?.url}"
 

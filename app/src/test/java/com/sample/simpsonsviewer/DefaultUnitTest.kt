@@ -1,4 +1,4 @@
-package com.sample.simpsonsviewer.permissions
+package com.sample.simpsonsviewer
 
 import android.app.Activity
 import android.content.Context

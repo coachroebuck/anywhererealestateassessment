@@ -1,6 +1,5 @@
 package com.sample.simpsonsviewer.di
 
-import androidx.activity.result.ActivityResultLauncher
 import com.sample.simpsonsviewer.api.client.ApiClientBuilder
 import com.sample.simpsonsviewer.api.client.DefaultApiClientBuilder
 import com.sample.simpsonsviewer.api.client.DefaultOkHttpClientBuilder
@@ -11,13 +10,9 @@ import com.sample.simpsonsviewer.api.service.DefaultServiceBuilder
 import com.sample.simpsonsviewer.api.service.DefaultSimpsonsCharactersAdapter
 import com.sample.simpsonsviewer.api.service.ServiceBuilder
 import com.sample.simpsonsviewer.api.service.SimpsonsCharactersAdapter
-import com.sample.simpsonsviewer.api.service.SimpsonsCharactersService
 import com.sample.simpsonsviewer.log.DefaultLogAdapter
 import com.sample.simpsonsviewer.log.LogAdapter
 import com.sample.simpsonsviewer.log.LoggingInterceptor
-import com.sample.simpsonsviewer.permissions.DefaultPermissionsUtility
-import com.sample.simpsonsviewer.permissions.PermissionsUtility
-import com.sample.simpsonsviewer.serialization.AppSerializer
 import com.sample.simpsonsviewer.util.AppCoroutineScope
 import com.sample.simpsonsviewer.wrapper.ActivityCompatWrapper
 import com.sample.simpsonsviewer.wrapper.ContextCompatWrapper
@@ -76,23 +71,6 @@ object WrappersModule {
     fun provideApiClientBuilder(): ApiClientBuilder =
         DefaultApiClientBuilder(protocol)
             .setDomain(domain)
-
-    @Singleton
-    @Provides
-    fun providePermissionsUtility(
-        requestPermissionLauncher: ActivityResultLauncher<String>,
-        contextCompatWrapper: ContextCompatWrapper = DefaultContextCompatWrapper(),
-        activityCompatWrapper: ActivityCompatWrapper = DefaultActivityCompatWrapper(),
-        @RequestPermissionsCompleted onRequestPermissionsCompleted: () -> Unit,
-        @PermissionExplanationRequired onPermissionExplanationRequired: () -> Unit,
-    ): PermissionsUtility =
-        DefaultPermissionsUtility(
-            requestPermissionLauncher = requestPermissionLauncher,
-            contextCompatWrapper = contextCompatWrapper,
-            activityCompatWrapper = activityCompatWrapper,
-            onRequestPermissionsCompleted = onRequestPermissionsCompleted,
-            onPermissionExplanationRequired = onPermissionExplanationRequired,
-        )
 
     @Singleton
     @Provides

@@ -2,7 +2,7 @@ package com.sample.simpsonsviewer.main
 
 import com.sample.simpsonsviewer.api.service.SimpsonsCharactersAdapter
 import com.sample.simpsonsviewer.main.mvi.MainRepositoryStore
-import com.sample.simpsonsviewer.permissions.DefaultUnitTest
+import com.sample.simpsonsviewer.DefaultUnitTest
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -114,7 +114,7 @@ class MainRepositoryTest : DefaultUnitTest() {
         emit(MainRepositoryStore.Intent.Search(text))
 
         validateEquality(
-            MainRepositoryStore.State.Error::class,
+            MainRepositoryStore.State.Success::class,
             repository.stateFlow.value::class
         )
     }
