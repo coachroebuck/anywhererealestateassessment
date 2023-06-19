@@ -38,9 +38,9 @@ class DefaultMainViewModel(
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putString(SearchQueryKey, _query)
+        outState.putString(SelectedTitleKey, selectedTitle)
         outState.putSerializable(ServiceResponseModelKey,
             response?.data?.let { ServiceResponseSummaryList(it) })
-        outState.putString(SelectedTitleKey, selectedTitle)
 
         when (_stateFlow.value) {
             MainViewModelStore.State.Idle -> {}
@@ -51,9 +51,9 @@ class DefaultMainViewModel(
             }
 
             MainViewModelStore.State.InProgress -> outState.putBoolean(InProgressKey, true)
-            is MainViewModelStore.State.Response -> { }
+            is MainViewModelStore.State.Response -> {}
 
-            is MainViewModelStore.State.ItemSelected -> { }
+            is MainViewModelStore.State.ItemSelected -> {}
         }
     }
 
@@ -68,18 +68,29 @@ class DefaultMainViewModel(
                 is MainViewModelStore.Intent.SubmitQueryText -> onSubmitQueryText(intent)
                 MainViewModelStore.Intent.RetrieveInformation -> onRetrieveInformation()
                 is MainViewModelStore.Intent.TitleSelected -> onTitleSelected(intent)
+                MainViewModelStore.Intent.BackPressed -> onBackPressed()
             }
         }
     }
 
+    private fun onBackPressed() {
+        selectedTitle = ""
+        onRetrieveInformation()
+    }
+
     private fun onTitleSelected(intent: MainViewModelStore.Intent.TitleSelected) {
+        selectedTitle = intent.title
         val selectedItem = this.response?.data?.firstOrNull { it.title == intent.title }
         sendResponse(MainViewModelStore.State.ItemSelected(selectedItem))
     }
 
     private fun onRetrieveInformation() {
-        sendResponse(MainViewModelStore.State.InProgress)
-        emit(MainInteractionStore.Intent.Retrieve)
+        response?.let {
+            sendResponse(MainViewModelStore.State.Response(ServiceResponseSummaryList(it.data)))
+        } ?: run {
+            sendResponse(MainViewModelStore.State.InProgress)
+            emit(MainInteractionStore.Intent.Retrieve)
+        }
     }
 
     private fun onOnSearchQueryChanged(intent: MainViewModelStore.Intent.OnSearchQueryChanged) {
@@ -98,36 +109,38 @@ class DefaultMainViewModel(
     @SuppressLint("NewApi")
     private fun restoreInstanceState(savedInstanceState: Bundle?) {
         savedInstanceState?.let { bundle ->
-            if (bundle.containsKey(SearchQueryKey)) {
-                _query = bundle.getString(SearchQueryKey, "")
-                sendResponse(MainViewModelStore.State.OriginalSearchQuery(_query))
+            _query = bundle.getString(SearchQueryKey, "")
+            selectedTitle = bundle.getString(SelectedTitleKey, "")
+
+            if (sdkVersion >= tiramisuVersion) {
+                (bundle.getSerializable(
+                    ServiceResponseModelKey,
+                    ServiceResponseSummaryList::class.java
+                ))
+            } else {
+                (bundle.getSerializable(
+                    ServiceResponseModelKey
+                ))
+                        as ServiceResponseSummaryList?
+            }?.let {
+                response = MainInteractionStore.State.Success(it.list)
+                sendResponse(MainViewModelStore.State.Response(it))
             }
-            if (bundle.containsKey(SelectedTitleKey)) {
-             selectedTitle = bundle.getString(SelectedTitleKey, "")
-            }
+
             if (bundle.containsKey(InProgressKey)) {
                 sendResponse(MainViewModelStore.State.InProgress)
+                onRetrieveInformation()
             } else if (bundle.containsKey(ErrorMessageKey)) {
                 val message = bundle.getString(ErrorMessageKey, "")
                 sendResponse(MainViewModelStore.State.Error(Throwable(message)))
-            } else if (bundle.containsKey(ServiceResponseModelKey)) {
-                if (sdkVersion >= tiramisuVersion) {
-                    (savedInstanceState.getSerializable(
-                        ServiceResponseModelKey,
-                        ServiceResponseSummaryList::class.java
-                    ))
-                } else {
-                    (savedInstanceState.getSerializable(
-                        ServiceResponseModelKey
-                    ))
-                            as ServiceResponseSummaryList?
-                }?.let { list ->
-                    sendResponse(MainViewModelStore.State.Response(list))
-                }
             }
 
-            emit(MainViewModelStore.Intent.OnSearchQueryChanged(_query))
-            emit(MainViewModelStore.Intent.TitleSelected(selectedTitle))
+            if (_query.isNotEmpty()) {
+                sendResponse(MainViewModelStore.State.OriginalSearchQuery(_query))
+            }
+            if (selectedTitle.isNotEmpty()) {
+                emit(MainViewModelStore.Intent.TitleSelected(selectedTitle))
+            }
         }
     }
 

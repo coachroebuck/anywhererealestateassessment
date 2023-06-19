@@ -6,7 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -32,10 +34,13 @@ class DetailsFragment : Fragment() {
     private lateinit var title: TextView
     private lateinit var details: TextView
     private lateinit var icon: ImageView
+    private lateinit var rootView: LinearLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            serviceResponseSummary = it.getSerializable(ServiceResponseSummaryKey) as ServiceResponseSummary?
+            serviceResponseSummary =
+                it.getSerializable(ServiceResponseSummaryKey) as ServiceResponseSummary?
         }
     }
 
@@ -57,6 +62,7 @@ class DetailsFragment : Fragment() {
                 }
             }
         }
+        rootView = view.findViewById(R.id.rootView)
         title = view.findViewById(R.id.title)
         details = view.findViewById(R.id.details)
         icon = view.findViewById(R.id.imageView)
@@ -65,23 +71,29 @@ class DetailsFragment : Fragment() {
     }
 
     private fun loadDetails() {
-
-        title.text = serviceResponseSummary?.title
-        details.text = serviceResponseSummary?.details
-        Glide.with(icon)
-            .load(serviceResponseSummary?.icon)
-            .error(R.drawable.photo_not_available)
-            .into(icon)
+        serviceResponseSummary?.let {
+            rootView.isVisible = true
+            title.text = serviceResponseSummary?.title
+            details.text = serviceResponseSummary?.details
+            Glide.with(icon)
+                .load(serviceResponseSummary?.icon)
+                .error(R.drawable.photo_not_available)
+                .into(icon)
+        } ?: run {
+            rootView.isVisible = false
+        }
     }
 
     private fun onStateReceived(state: MainViewModelStore.State) {
-        when(state) {
-            is MainViewModelStore.State.Error -> { }
-            MainViewModelStore.State.Idle -> { }
-            MainViewModelStore.State.InProgress -> { }
-            is MainViewModelStore.State.OriginalSearchQuery -> { }
-            is MainViewModelStore.State.Response -> {  }
-            is MainViewModelStore.State.ItemSelected -> { onItemSelected(state) }
+        when (state) {
+            is MainViewModelStore.State.Error -> {}
+            MainViewModelStore.State.Idle -> {}
+            MainViewModelStore.State.InProgress -> {}
+            is MainViewModelStore.State.OriginalSearchQuery -> {}
+            is MainViewModelStore.State.Response -> {}
+            is MainViewModelStore.State.ItemSelected -> {
+                onItemSelected(state)
+            }
         }
     }
 

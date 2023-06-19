@@ -48,16 +48,17 @@ class MainActivity : AppCompatActivity() {
             // Tablet layout: Add both fragments to the container
             val fragmentManager: FragmentManager = supportFragmentManager
             fragmentManager.beginTransaction()
-                .add(R.id.list_container, ListFragment())
-                .add(R.id.detail_container, DetailsFragment())
+                .replace(R.id.list_container, ListFragment())
+                .replace(R.id.detail_container, DetailsFragment())
                 .commit()
         } else {
             setContentView(R.layout.activity_main)
 
             // Phone layout: Add only the list fragment to the container
             val fragmentManager: FragmentManager = supportFragmentManager
+            fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             fragmentManager.beginTransaction()
-                .add(R.id.container, ListFragment())
+                .replace(R.id.container, ListFragment())
                 .commit()
         }
         setSupportActionBar(binding.appBarMain.toolbar)
@@ -92,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                 postBackPressed()
             }
         } else {
-            onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     postBackPressed()
                 }
@@ -108,10 +109,12 @@ class MainActivity : AppCompatActivity() {
         if (detailsFragment is DetailsFragment) {
             // Pop the DetailsFragment from the back stack
             fragmentManager.popBackStack()
+            findViewById<SearchView>(R.id.searchView).isVisible = true
         } else {
             // No DetailsFragment found, proceed with default back button behavior
-            super.onBackPressed()
+            moveTaskToBack(true) // Sends app to background
         }
+        emit(MainViewModelStore.Intent.BackPressed)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -150,6 +153,7 @@ class MainActivity : AppCompatActivity() {
                 .replace(R.id.container, DetailsFragment())
                 .addToBackStack(null) // Add to back stack to enable back navigation
                 .commit()
+            findViewById<SearchView>(R.id.searchView).isVisible = false
         }
     }
 
